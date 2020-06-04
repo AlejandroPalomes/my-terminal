@@ -1,32 +1,8 @@
-var root = [
-    {
-        "type": "archive",
-        "name": "readme.txt",
-        "pwd": "root/"
-    },
-    {
-        "type": "folder",
-        "name": "src",
-        "pwd": "root/",
-        "content": [
-            {
-                "type": "archive",
-                "name": "log.txt",
-                "pwd": "root/src"
-            },
-            {
-                "type": "folder",
-                "name": "imgs",
-                "pwd": "root/src",
-                "content": []
-            }
-        ]
-    }
-]
-var actualFolder = root;
+var actualFolderPath = "/";
+var actualFolder = root2;
 var prevFolder;
-var actualFolderName = "root";
-var actualFolderPath = "root";
+//Habria que especificar el prevFolder inicial -> lo inicializamos para que sea el actualFolder? // Sí! Creo que no hay problemas
+prevFolder = actualFolder;
 
 $("#terminal__input").keydown(userAction);
 
@@ -38,50 +14,120 @@ function userAction() {
         // Splitting the command for evaluation
         var input = $("#terminal__input").val().split(" ");
 
-        //$(input).each((_,e)=>{
             switch (input[0]){
                 case "ls":
                     ls(actualFolder);
                 break
                 case "cd":
-                    actualFolder = cd(actualFolder, input[1]);
-                    console.log("cd chosen");
+                    actualFolder = cd(input[1]);
                 break
+                case "pwd":
+                    //Print working directory
+                    $("#terminal__output").append($("<p>").text(actualFolder.pwd));
+                break;
+                case "mkdir":
+                    //Create folder
+                    mkdir(input[1]);
+                break;
+                case "echo":
+                    //Create files and with the possibility of adding text
+                break;
+                case "cat":
+                    //Show content of a created file
+                break;
+                case "rm":
+                    //Delete file
+                break;
+                case "mv":
+                    //Move file or rename it
+                break;
+                case "clear":
+                    //Clear console window
+                    $("#terminal__output").empty();
+                break;
+                case "help":
+                    //commands available
+                    $("#terminal__output").append($("<p class='help-comnd'>" + "pwd" + "</p>" + "<span class='help'>" + "--Print working directory" + "</span>"))
+                    .append($("<p class='help-comnd'>" + "mkdir" + "</p>" + "<span class='help'>" + "--Create new directory" + "</span>"))
+                   
+                break;
         }
-        //});
         $('#terminal__input').val("");
         $(".main__display__input span").text(actualFolderPath + " $ ");
     }
 }
 
-function cd (actualFolder, nextFolder) {
+function cd(nextFolder) {
     if (nextFolder == "..") {
         actualFolder = prevFolder;
     } else {
-        let loop = true;
-        actualFolder.forEach((file, index) => {
-            if (file.name == nextFolder && file.type == "folder" && loop) {
-                console.log("changing folder", file.name, file.content);
-                prevFolder = actualFolder;
-                actualFolderPath = file.pwd+file.name;
-                actualFolderName = file.name;
-                actualFolder = file.content;
-                loop = false;
+        let found = false;
+        actualFolder.content.forEach((file) => {
+            if (file.name == nextFolder && file.type == "folder" && !found) {
+                //If the file name matches the search and it is a folder then we change directory and update current
+                // actualFolder.pwd : $root/src
+                // destFolder.pwd : $root/src/js
+                var sub_folder;
+                do{
+                    root2.content.forEach(element => {
+                        console.log(actualFolder.pwd)
+                        // /root/src/
+                        //root2.content[1]
+                    })
+                }while(sub_folder== true)
+
+
+                // Splitting the path of the actual selected folder
+                var splitPath = file.pwd.split("/")
+                // If the path length has 2 folders
+                if (splitPath.length <= 2) { //hay que poner esto en formato function, para que al hacer cd .., también se ejecute // vale ahora lo hago
+                    searchPrev = root2;
+                } else {
+                    searchPrev = root2;
+                    for (let i = 1; i < splitPath.length-1; i++) {
+                        searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
+                        console.log(searchPrev);
+                    }
+                }
+                console.log(splitPath);
+                console.log(searchPrev); // creo que he conseguido si?? // mira "cd src"/"cd imgs"/"cd beach"/"cd barceloneta" //hmmm tiene buena pinta
+
+                actualFolder = file;
+                prevFolder = searchPrev;
+
+                found = true;
             }
         });
-        if (loop) {
+        if (!found) {
             $("#terminal__output").append($("<p>").text("Folder does not exist"));
         }
     }
+    actualFolderPath = actualFolder.pwd+actualFolder.name;
     return actualFolder;
 }
 
 function ls(folder){
-    console.log(actualFolder);
-    $(folder).each((_, e)=>{
+    $(folder.content).each((_, e)=>{
         $("#terminal__output").append($(`<p>${e.name}</p>`));
     })
 }
+
+function mkdir(newFolderName){
+    let newFolder = {"type":"folder","name":newFolderName,"pwd":actualFolderPath+"/","content":[]}
+    actualFolder.content.push(newFolder);
+}
+
+function searchPrevFolder(){
+    
+}
+
+
+
+
+
+
+
+
 
 // $(document).ready(
 //     function () {
