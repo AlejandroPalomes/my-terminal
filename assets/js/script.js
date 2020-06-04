@@ -23,7 +23,6 @@ var root = [
         ]
     }
 ]
-
 var actualFolder = root;
 var actualFolderName = "root";
 var actualFolderPath = "root";
@@ -33,7 +32,6 @@ $("#terminal__input").keydown(userAction);
 function userAction() {
     // When the user sends a command
     if (event.key == "Enter") {
-        console.log(actualFolder)
         // Printing the command on the terminal
         $("#terminal__output").append($("<p>").text(actualFolderName + " $ " + $("#terminal__input").val()));
         // Splitting the command for evaluation
@@ -42,12 +40,11 @@ function userAction() {
         //$(input).each((_,e)=>{
             switch (input[0]){
                 case "ls":
-                    console.log(actualFolder)
                     ls(actualFolder);
                 break
                 case "cd":
-                    cd(actualFolder, input[1]);
-                    console.log("cd chosen")
+                    actualFolder = cd(actualFolder, input[1]);
+                    console.log("cd chosen");
                 break
         }
         //});
@@ -57,24 +54,28 @@ function userAction() {
 }
 
 function cd (actualFolder, nextFolder) {
-    console.log("entered cd function")
-    let loop = true;
-    actualFolder.forEach((file, index) => {
-        if (file.name == nextFolder && file.type == "folder" && loop) {
-            console.log("changing folder", file.name, file.content);
-            actualFolderPath = file.pwd+file.name;
-            actualFolderName = file.name;
-            actualFolder = file.content;
-            loop = false;
-            console.log(actualFolder)
-        } else if (loop && index+1 == actualFolder.length){
+    if (nextFolder == "..") {
+
+    } else {
+        let loop = true;
+        actualFolder.forEach((file, index) => {
+            if (file.name == nextFolder && file.type == "folder" && loop) {
+                console.log("changing folder", file.name, file.content);
+                actualFolderPath = file.pwd+file.name;
+                actualFolderName = file.name;
+                actualFolder = file.content;
+                loop = false;
+            }
+        }); // Perfect! :)
+        if (loop) {
             $("#terminal__output").append($("<p>").text("Folder does not exist"));
         }
-    });
+    }
+    return actualFolder;
 }
 
 function ls(folder){
-    console.log(folder);
+    console.log(actualFolder);
     $(folder).each((_, e)=>{
         $("#terminal__output").append($(`<p>${e.name}</p>`));
     })
