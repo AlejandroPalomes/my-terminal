@@ -29,12 +29,19 @@
     border-radius: 7px;
     position: relative;
 }
+.main__display .display__show{
+    margin: 2px 4px;
+}
 .main__display input{
     width: 100%;
     padding: 5px;
     background: none;
     color: white;
     border: none;
+}
+
+.main__display:focus{
+    outline: none;
 }
 
 .main__display__menu{
@@ -50,6 +57,11 @@
 .main__display__menu span{
     display: inline-block;
     margin-top: 5px;
+}
+
+.main__display__input{
+    display: flex;
+    align-items: center;
 }
 
 
