@@ -30,14 +30,8 @@
     position: relative;
 }
 .main__display .display__show{
-    margin: 2px 4px;
-}
-.main__display input{
-    width: 100%;
-    padding: 5px;
-    background: none;
-    color: white;
-    border: none;
+    /* margin: 2px 4px; */
+    padding: 10px;
 }
 
 .main__display:focus{
@@ -62,6 +56,13 @@
 .main__display__input{
     display: flex;
     align-items: center;
+}
+.main__display__input input{
+    width: 60%;
+    padding: 5px;
+    background: none;
+    color: white;
+    border: none;
 }
 
 
