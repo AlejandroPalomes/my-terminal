@@ -49,7 +49,6 @@ function userAction() {
                     //commands available
                     $("#terminal__output").append($("<p class='help-comnd'>" + "pwd" + "</p>" + "<span class='help'>" + "--Print working directory" + "</span>"))
                     .append($("<p class='help-comnd'>" + "mkdir" + "</p>" + "<span class='help'>" + "--Create new directory" + "</span>"))
-                   
                 break;
         }
         $('#terminal__input').val("");
@@ -60,6 +59,7 @@ function userAction() {
 function cd(nextFolder) {
     if (nextFolder == "..") {
         actualFolder = prevFolder;
+        prevFolder = searchPrevFolder(actualFolder);
     } else {
         let found = false;
         actualFolder.content.forEach((file) => {
@@ -68,32 +68,16 @@ function cd(nextFolder) {
                 // actualFolder.pwd : $root/src
                 // destFolder.pwd : $root/src/js
                 var sub_folder;
-                do{
-                    root2.content.forEach(element => {
-                        console.log(actualFolder.pwd)
-                        // /root/src/
-                        //root2.content[1]
-                    })
-                }while(sub_folder== true)
-
-
-                // Splitting the path of the actual selected folder
-                var splitPath = file.pwd.split("/")
-                // If the path length has 2 folders
-                if (splitPath.length <= 2) { //hay que poner esto en formato function, para que al hacer cd .., también se ejecute // vale ahora lo hago
-                    searchPrev = root2;
-                } else {
-                    searchPrev = root2;
-                    for (let i = 1; i < splitPath.length-1; i++) {
-                        searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
-                        console.log(searchPrev);
-                    }
-                }
-                console.log(splitPath);
-                console.log(searchPrev); // creo que he conseguido si?? // mira "cd src"/"cd imgs"/"cd beach"/"cd barceloneta" //hmmm tiene buena pinta
+                // do{
+                //     root2.content.forEach(element => {
+                //         console.log(actualFolder.pwd)
+                //         // /root/src/
+                //         //root2.content[1]
+                //     })
+                // }while(sub_folder== true)
 
                 actualFolder = file;
-                prevFolder = searchPrev;
+                prevFolder = searchPrevFolder(file);
 
                 found = true;
             }
@@ -117,8 +101,22 @@ function mkdir(newFolderName){
     actualFolder.content.push(newFolder);
 }
 
-function searchPrevFolder(){
-    
+function searchPrevFolder(file){
+    // Splitting the path of the actual selected folder
+    var splitPath = file.pwd.split("/")
+    // If the path length has 2 folders means that the previous folder is the ROOT
+    if (splitPath.length <= 2) {
+        searchPrev = root2;
+    } else {
+        searchPrev = root2;
+        // Searching for the previous folder beginning by the root
+        for (let i = 1; i < splitPath.length-1; i++) { //Ya funciona perfecto!! Guilherme vaya crack!
+            searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
+        }
+    }
+    console.log(splitPath);
+    console.log(searchPrev);
+    return searchPrev;
 }
 
 
