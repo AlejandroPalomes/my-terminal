@@ -7,16 +7,19 @@ var root2 = {
                 "type": "archive",
                 "name": "readme.txt",
                 "pwd": "root/",
+                "size": 28,
                 "content": "I am a text inside readme.txt"
             },
             {
                 "type": "folder",
                 "name": "src",
                 "pwd": "root/",
+                "size": totalSize(content),
                 "content": [
                     {
                         "type": "archive",
                         "name": "log.txt",
+                        "size": 2000,
                         "pwd": "root/src/"
                     },
                     {
@@ -33,8 +36,16 @@ var root2 = {
                                         "type": "folder",
                                         "name": "barceloneta",
                                         "pwd": "root/src/imgs/beach/",
+                                        "size": 30000,
                                         "content": []
-                                    }
+                                    },
+                                    {
+                                        "type": "folder",
+                                        "name": "masnou",
+                                        "pwd": "root/src/imgs/beach/",
+                                        "size": 20000,
+                                        "content": []
+                                    },
                                 ]
                             }
                         ]
@@ -42,6 +53,9 @@ var root2 = {
                 ]
             }
         ]
+}
+function totalSize(content){
+    //console.log(content)
 }
 /*
 var root = {

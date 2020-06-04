@@ -1,4 +1,4 @@
-var actualFolderPath = "/";
+var actualFolderPath = "root";
 var actualFolder = root2;
 var prevFolder;
 //Habria que especificar el prevFolder inicial -> lo inicializamos para que sea el actualFolder? // Sí! Creo que no hay problemas
@@ -16,7 +16,7 @@ function userAction() {
 
             switch (input[0]){
                 case "ls":
-                    ls(actualFolder);
+                    ls(actualFolder, input[1]);
                 break
                 case "cd":
                     actualFolder = cd(input[1]);
@@ -34,12 +34,15 @@ function userAction() {
                 break;
                 case "cat":
                     //Show content of a created file
+                    cat(input[1]);
                 break;
                 case "rm":
                     //Delete file
+                    rm(input[1]);
                 break;
                 case "mv":
                     //Move file or rename it
+                    mv(input[1],input[2]);
                 break;
                 case "clear":
                     //Clear console window
@@ -48,8 +51,21 @@ function userAction() {
                 case "help":
                     //commands available
                     $("#terminal__output").append($("<p class='help-comnd'>" + "pwd" + "</p>" + "<span class='help'>" + "--Print working directory" + "</span>"))
-                    .append($("<p class='help-comnd'>" + "mkdir" + "</p>" + "<span class='help'>" + "--Create new directory" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "ls" + "</p>" + "<span class='help'>" + "--Lists contents of files and directories" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "ls -R" + "</p>" + "<span class='help'>" + "--List recursively directory tree" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "ls -S" + "</p>" + "<span class='help'>" + "--Sort by file size" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "ls -t" + "</p>" + "<span class='help'>" + "--Sort by time & date" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "cd" + "</p>" + "<span class='help'>" + "--Change directory or folder" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "cd .." + "</p>" + "<span class='help'>" + "--Change to parent directory" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "mkdir" + "</p>" + "<span class='help'>" + "--Create new directory" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "echo" + "</p>" + "<span class='help'>" + "--Create new file" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "cat" + "</p>" + "<span class='help'>" + "--Display the content of text files" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "rm" + "</p>" + "<span class='help'>" + "--Remove a file" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "mv" + "</p>" + "<span class='help'>" + "--Move files and directories" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "clear" + "</p>" + "<span class='help'>" + "--Clear console window" + "</span>"))
                 break;
+                default:
+                    $("#terminal__output").append($(`<p class="error">Wrong command, please use <b class="error">help</b> for a list of options<p>`))
         }
         $('#terminal__input').val("");
         $(".main__display__input span").text(actualFolderPath + " $ ");
@@ -65,20 +81,8 @@ function cd(nextFolder) {
         actualFolder.content.forEach((file) => {
             if (file.name == nextFolder && file.type == "folder" && !found) {
                 //If the file name matches the search and it is a folder then we change directory and update current
-                // actualFolder.pwd : $root/src
-                // destFolder.pwd : $root/src/js
-                var sub_folder;
-                // do{
-                //     root2.content.forEach(element => {
-                //         console.log(actualFolder.pwd)
-                //         // /root/src/
-                //         //root2.content[1]
-                //     })
-                // }while(sub_folder== true)
-
                 actualFolder = file;
                 prevFolder = searchPrevFolder(file);
-
                 found = true;
             }
         });
@@ -90,10 +94,19 @@ function cd(nextFolder) {
     return actualFolder;
 }
 
-function ls(folder){
-    $(folder.content).each((_, e)=>{
-        $("#terminal__output").append($(`<p>${e.name}</p>`));
-    })
+function ls(folder, parameter){
+    if(parameter === "-S"){
+        folder.content.sort((a, b)=>{
+            return a.size - b.size;
+        });
+        $(folder.content).each((_, e)=>{
+            $("#terminal__output").append($(`<p><span>${e.name}</span> <span>${e.size}kb</span></p>`));
+        })
+    }else{
+        $(folder.content).each((_, e)=>{
+            $("#terminal__output").append($(`<p>${e.name}</p>`));
+        })
+    }
 }
 
 function mkdir(newFolderName){
@@ -101,45 +114,33 @@ function mkdir(newFolderName){
     actualFolder.content.push(newFolder);
 }
 
+function cat(fileName) {
+    let file;
+    $("#terminal__output").append($(`<p>${file.content}</p>`));
+}
+
+function rm(file) {
+
+}
+
+function mv(moveFile,destinationFile) {
+
+}
+
 function searchPrevFolder(file){
     // Splitting the path of the actual selected folder
     var splitPath = file.pwd.split("/")
-    // If the path length has 2 folders means that the previous folder is the ROOT
+    // If the path length has 2 folders means that the previous folder is the ROOT. E.g root/src will give us a size 2 array ;)
     if (splitPath.length <= 2) {
         searchPrev = root2;
     } else {
         searchPrev = root2;
         // Searching for the previous folder beginning by the root
-        for (let i = 1; i < splitPath.length-1; i++) { //Ya funciona perfecto!! Guilherme vaya crack!
+        for (let i = 1; i < splitPath.length-1; i++) { //Ya funciona perfecto!! Guilherme vaya crack! // We did It :D
             searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
         }
     }
-    console.log(splitPath);
-    console.log(searchPrev);
+    // console.log(splitPath);
+    // console.log(searchPrev);
     return searchPrev;
 }
-
-
-
-
-
-
-
-
-
-// $(document).ready(
-//     function () {
-//         $("input").addClass("-real-textarea");
-//         //   $(".textarea-wrapper").append("<textarea class=\"hidden\"></textarea>");
-//         $(".textarea-wrapper textarea.hidden").keyup(
-//             function () {
-//                 $(".textarea-wrapper textarea.-real-textarea").val($(this).val());
-//             }
-//         );
-//         $(".textarea-wrapper textarea.-real-textarea").focus(
-//             function () {
-//                 $(this).parent().find("textarea.hidden").focus();
-//             }
-//         );
-//     }
-// )
