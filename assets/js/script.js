@@ -24,6 +24,7 @@ var root = [
     }
 ]
 var actualFolder = root;
+var prevFolder;
 var actualFolderName = "root";
 var actualFolderPath = "root";
 
@@ -33,7 +34,7 @@ function userAction() {
     // When the user sends a command
     if (event.key == "Enter") {
         // Printing the command on the terminal
-        $("#terminal__output").append($("<p>").text(actualFolderName + " $ " + $("#terminal__input").val()));
+        $("#terminal__output").append($("<p>").text(actualFolderPath + " $ " + $("#terminal__input").val()));
         // Splitting the command for evaluation
         var input = $("#terminal__input").val().split(" ");
 
@@ -55,18 +56,19 @@ function userAction() {
 
 function cd (actualFolder, nextFolder) {
     if (nextFolder == "..") {
-
+        actualFolder = prevFolder;
     } else {
         let loop = true;
         actualFolder.forEach((file, index) => {
             if (file.name == nextFolder && file.type == "folder" && loop) {
                 console.log("changing folder", file.name, file.content);
+                prevFolder = actualFolder;
                 actualFolderPath = file.pwd+file.name;
                 actualFolderName = file.name;
                 actualFolder = file.content;
                 loop = false;
             }
-        }); // Perfect! :)
+        });
         if (loop) {
             $("#terminal__output").append($("<p>").text("Folder does not exist"));
         }
