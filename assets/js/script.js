@@ -23,3 +23,7 @@ var root = [
         ]
     }
 ]
+
+function cd (actualFolder, nextFolder) {
+
+}
