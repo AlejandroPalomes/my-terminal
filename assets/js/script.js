@@ -24,6 +24,14 @@ var root = [
     }
 ]
 
-function cd (actualFolder, nextFolder) {
+var actualFolder = root;
 
+function cd (actualFolder, nextFolder) {
+    actualFolder.forEach((file,index) => {
+        if (file.name == nextFolder && file.type == "folder") {
+            actualFolder = actualFolder[index];
+        } else {
+            console.log("Folder does not exist");
+        }
+    });
 }
