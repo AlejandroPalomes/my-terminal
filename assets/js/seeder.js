@@ -14,11 +14,12 @@ var root2 = {
                 "type": "folder",
                 "name": "src",
                 "pwd": "root/",
-                "size": totalSize(content),
+                // "size": totalSize(content),
                 "content": [
                     {
                         "type": "archive",
                         "name": "log.txt",
+                        "content": "10/Jun/2019 - iPhone login - status: ok",
                         "size": 2000,
                         "pwd": "root/src/"
                     },

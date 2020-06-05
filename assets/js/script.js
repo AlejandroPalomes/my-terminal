@@ -31,6 +31,7 @@ function userAction() {
                 break;
                 case "echo":
                     //Create files and with the possibility of adding text
+                    
                 break;
                 case "cat":
                     //Show content of a created file
@@ -63,6 +64,11 @@ function userAction() {
                     .append($("<br>"+"<p class='help-comnd'>" + "rm" + "</p>" + "<span class='help'>" + "--Remove a file" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "mv" + "</p>" + "<span class='help'>" + "--Move files and directories" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "clear" + "</p>" + "<span class='help'>" + "--Clear console window" + "</span>"))
+                break;
+                // man (Manual command)
+                case "man ":
+                    //Clear console window
+                    $("#terminal__output").empty();
                 break;
                 default:
                     $("#terminal__output").append($(`<p class="error">Wrong command, please use <b class="error">help</b> for a list of options<p>`))
@@ -115,16 +121,25 @@ function mkdir(newFolderName){
 }
 
 function cat(fileName) {
-    let file;
+    let file = actualFolder.content.find( ({name} ) => name === fileName);
+    if (file )
     $("#terminal__output").append($(`<p>${file.content}</p>`));
 }
 
 function rm(file) {
 
-}
+    let index;
+    $(actualFolder.content).each((i, element)=>{
+        if (element.name == file) {
+            index = i;
+        }
+    });
 
-function mv(moveFile,destinationFile) {
+    if (index > -1) {
+        actualFolder.content.splice(index, 1);
+    };
 
+    // localStorage.setItem("root", JSON.stringify(storage));
 }
 
 function searchPrevFolder(file){
@@ -136,7 +151,7 @@ function searchPrevFolder(file){
     } else {
         searchPrev = root2;
         // Searching for the previous folder beginning by the root
-        for (let i = 1; i < splitPath.length-1; i++) { //Ya funciona perfecto!! Guilherme vaya crack! // We did It :D
+        for (let i = 1; i < splitPath.length-1; i++) {
             searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
         }
     }
