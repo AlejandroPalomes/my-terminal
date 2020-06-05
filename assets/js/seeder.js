@@ -12,6 +12,23 @@ var root2 = {
                 "content": "I am a text inside readme.txt"
             },
             {
+                "type": "js",
+                "name": "calculator.js",
+                "pwd": "root/",
+                "size": 28,
+                "date": "1999/10/28",
+                "pathJS": "assets/js/calculator.js"
+            },
+            {
+                "type": "js",
+                "name": "myScript.js",
+                "pwd": "root/",
+                "size": 28,
+                "date": "1999/10/18",
+                "content": 'function haha()){return 3+3}; haha()',
+                // "content": 'haha()',
+            },
+            {
                 "type": "folder",
                 "name": "src",
                 "pwd": "root/",

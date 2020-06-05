@@ -57,7 +57,6 @@ function userAction() {
         $("#terminal__output").append($("<p>").text(actualFolderPath + " $ " + $("#terminal__input").val()));
         // Saving command on commands history (localStorage) if it's not equal to the last command saved
         if ($("#terminal__input").val() != comndHistory[comndHistory.length -1]) {
-            console.log("command saved")
             comndHistory.push($("#terminal__input").val());
             localStorage.setItem("comndHistory", JSON.stringify(comndHistory));
         }
@@ -115,6 +114,10 @@ function userAction() {
                     .append($("<br>"+"<p class='help-comnd'>" + "mv" + "</p>" + "<span class='help'>" + "--Move files and directories" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "clear" + "</p>" + "<span class='help'>" + "--Clear console window" + "</span>"))
                 break;
+                case "JS":
+                    //Execute javascript files
+                    executeJs(input[1], input[2], input[3], input[4]);
+                break;
                 // Manual command
                 case "man":
                     {
@@ -124,7 +127,6 @@ function userAction() {
                                 $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "pwd - Print name of current/working directory" + "</span>"))
                                 .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" pwd" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]..." + "</span>"))
                                 .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Print the full filename of the current working directory." + "</span>"))
-
                             break;
                             case "ls":
                                 $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "ls - List directory contents" + "</span>"))
@@ -171,7 +173,6 @@ function userAction() {
                                 $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "clear - Clear the terminal screen" + "</span>"))
                                 .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" clear" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]..." + "</span>"))
                                 .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Clears your screen." + "</span>"))
-
                             break;
                             default:
                                 $("#terminal__output").append($(`<p class="error">Wrong command, please use <b class="error">help</b> for a list of options<p>`))
@@ -247,15 +248,12 @@ function fileWalker(folder){
     $(folder.content).each((_, e)=>{
         $("#terminal__output").append($(`<span>${e.name}</span><span> </span>`));
     })
-    // $("#terminal__output").append($("<br>"));
     //then we make recursive calls for every folder inside it
     $(folder.content).each((_, e)=>{
         if(e.type === "folder"){
             fileWalker(e);
         }
     })
-
-    // $("#terminal__output").append($("<br>"));
 }
 
 function mkdir(newFolderName){
@@ -270,8 +268,13 @@ function mkdir(newFolderName){
 
 function echo(name, fill){
     fill ? content = fill : content = "";
+    let extension = name.slice(-2);
+    let type = "archive";
 
-    let newFile = {"type":"archive","name":name,"pwd":actualFolderPath+"/","content":content}
+    if (extension === "js"){
+        type = "js"
+    }
+    let newFile = {"type":type,"name":name,"pwd":actualFolderPath+"/","content":content}
     actualFolder.content.push(newFile);
 }
 
@@ -285,7 +288,6 @@ function cat(fileName) {
 }
 
 function rm(file) {
-
     let index;
     $(actualFolder.content).each((i, element)=>{
         if (element.name == file) {
@@ -301,14 +303,12 @@ function rm(file) {
 }
 
 function mv(fileName, location){
-
     let folders = actualFolder.content.filter(e=> e.type === "folder");
     let foldersNames = folders.map(e=> e.name);
     let file = actualFolder.content.find(({name}) => name === fileName);
     let prevFolder = searchPrevFolder(actualFolder);
     let path;
     if(location){
-    // if(location && location.includes("/")){
         path = location.split("/");
     }
 
@@ -379,6 +379,27 @@ function mv(fileName, location){
         }
     }else{
         $("#terminal__output").append($(`<p class='error'>mv: ${fileName}: no such file or directory<p>`));
+    }
+}
+
+function executeJs(fileName, op, a, b){
+    let file = actualFolder.content.find(({name}) => name === fileName);
+
+    // let extension = fileName.slice(-2);
+    if (file.type === "js"){
+        if(file.pathJS && fileName == "calculator.js"){
+            $.get(file.pathJS, (code) => {
+                $('#terminal__output').append($('<p>Result: '+ (eval(`${code}; ${op}(${a}, ${b})`)) + '<p>').css("color","aqua"));
+            });
+        }else{
+            try {
+                eval(file.content);
+            } catch (e) {
+                $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
+            }
+        }
+    }else{
+        $("#terminal__output").append($(`<p class='error'>JS: ${fileName}: this file is not a javascript type <p>`));
     }
 }
 
