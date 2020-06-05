@@ -385,11 +385,15 @@ function mv(fileName, location){
 function executeJs(fileName, op, a, b){
     let file = actualFolder.content.find(({name}) => name === fileName);
 
-    // let extension = fileName.slice(-2);
     if (file.type === "js"){
         if(file.pathJS && fileName == "calculator.js"){
             $.get(file.pathJS, (code) => {
-                $('#terminal__output').append($('<p>Result: '+ (eval(`${code}; ${op}(${a}, ${b})`)) + '<p>').css("color","aqua"));
+                try{
+                    var result = (eval(`${code}; ${op}(${a}, ${b})`))
+                    $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
+                } catch (e){
+                    $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
+                }
             });
         }else{
             try {
