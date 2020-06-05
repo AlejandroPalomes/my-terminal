@@ -15,26 +15,30 @@ $("#terminal__input").keydown(userAction);
 
 // When the user press Tab, Enter, Down Arrow or Up Arrow
 function userAction() {
+    $(".sugestion-autocomplete").remove();
     // Tab key event to autocomplete the folder/archive name
     if (event.key == "Tab") {
         event.preventDefault();
         var splitComplete = $("#terminal__input").val().split(" ");
-        if (splitComplete.length > 1) {
+        if (splitComplete.length > 1 && splitComplete[1] != "") {
             var autoComplete = splitComplete[splitComplete.length-1];
             let file = actualFolder.content.filter(({name})=> name.includes(autoComplete));
-            console.log(file);
             if (file.length == 1) {
                 splitComplete[splitComplete.length-1] = file[0].name;
                 splitComplete = splitComplete.join(" ");
                 $("#terminal__input").val(splitComplete);
             } else if (file.length > 1) {
+                $("<div>").addClass("sugestion-autocomplete").insertAfter(".main__display__input");
                 $(file).each((_, e) => {
-                    console.log(e);
-                    $(".main__terminal__input").append(`<span>${e.name}</span>`);
-            })
+                    $(".main__display__input").next().append(`<span class="autocomplete">${e.name}/</span>`);
+                    document.querySelector(".display__show").scrollTop = document.querySelector(".display__show").scrollHeight;
+                });
+            }
         }
     }
-}
+    if(event.key == "F8"){
+        $("#terminal__output").empty();
+    }
     // Up arrow key event to recover last commands
     if (event.key == "ArrowUp") {
         event.preventDefault();
@@ -51,9 +55,12 @@ function userAction() {
     if (event.key == "Enter") {
         // Printing the command on the terminal
         $("#terminal__output").append($("<p>").text(actualFolderPath + " $ " + $("#terminal__input").val()));
-        // Saving command on commands history (localStorage)
-        comndHistory.push($("#terminal__input").val());
-        localStorage.setItem("comndHistory", JSON.stringify(comndHistory));
+        // Saving command on commands history (localStorage) if it's not equal to the last command saved
+        if ($("#terminal__input").val() != comndHistory[comndHistory.length -1]) {
+            console.log("command saved")
+            comndHistory.push($("#terminal__input").val());
+            localStorage.setItem("comndHistory", JSON.stringify(comndHistory));
+        }
         // Splitting the command for evaluation on Switch
         var input = $("#terminal__input").val().split(" ");
 
@@ -157,9 +164,17 @@ function userAction() {
                             break;
                             case "mv":
                                 $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "mv - Move (rename) files." + "</span>"))
-                                .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" mkdir" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]... " + "<span class='synopsis-s'>" + "DIRECTORY" + "</span>"+ "..." + "</span>"))
-                                .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Print the full filename of the current working directory." + "</span>"))
+                                .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" mkdir" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]... " + "<span class='synopsis-s'>" + "SOURCE" + "</span>"+ "... " + "</span>" + "<span class='synopsis-s'>" + "DIRECTORY" + "</span>"+ "..." + "</span>"))
+                                .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Rename or move SOURCE(s) to DIRECTORY" + "</span>"))
                             break;
+                            case "clear":
+                                $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "clear - Clear the terminal screen" + "</span>"))
+                                .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" clear" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]..." + "</span>"))
+                                .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Clears your screen." + "</span>"))
+
+                            break;
+                            default:
+                                $("#terminal__output").append($(`<p class="error">Wrong command, please use <b class="error">help</b> for a list of options<p>`))
                         }
                     }
                 break;
@@ -169,6 +184,7 @@ function userAction() {
         $('#terminal__input').val("");
         $(".main__display__input span").text(actualFolderPath + " $ ");
         pastComnd = comndHistory.length;
+        document.querySelector(".display__show").scrollTop = document.querySelector(".display__show").scrollHeight;
     }
 }
 
@@ -217,28 +233,39 @@ function ls(folder, parameter){
     }
     else{
         $(folder.content).each((_, e)=>{
-            $("#terminal__output").append($(`<p>${e.name}</p>`));
+            $("#terminal__output").append($(`<span>${e.name}</span><span> </span>`));
         })
     }
 }
 
 function fileWalker(folder){
+    //if the folder has contents we highlight it
+    if(folder.content.length !== 0){
+        $("#terminal__output").append($(`<p class='folder_title'><b>./${folder.name}:</b></p>`));
+    }
+    //once we detect a folder, first we list all the contents
+    $(folder.content).each((_, e)=>{
+        $("#terminal__output").append($(`<span>${e.name}</span><span> </span>`));
+    })
+    // $("#terminal__output").append($("<br>"));
+    //then we make recursive calls for every folder inside it
     $(folder.content).each((_, e)=>{
         if(e.type === "folder"){
-            //If we find a folder, then we perform a recursive call
-            $("#terminal__output").append($(`<p>./${e.name}:</p>`));
             fileWalker(e);
         }
-        else{
-            $("#terminal__output").append($(`<span>${e.name}</span>`));
-        }
     })
+
     // $("#terminal__output").append($("<br>"));
 }
 
 function mkdir(newFolderName){
-    let newFolder = {"type":"folder","name":newFolderName,"pwd":actualFolderPath+"/","content":[]}
-    actualFolder.content.push(newFolder);
+    // Verifying if folder already exists
+    if (actualFolder.content.find( ({name} ) => name === newFolderName)){
+        $("#terminal__output").append($("<p>").text(newFolderName+" folder already exists").addClass("error"));
+    } else {
+        let newFolder = {"type":"folder","name":newFolderName,"pwd":actualFolderPath+"/","content":[]}
+        actualFolder.content.push(newFolder);
+    }
 }
 
 function echo(name, fill){
@@ -251,7 +278,7 @@ function echo(name, fill){
 function cat(fileName) {
     let file = actualFolder.content.find( ({name} ) => name === fileName);
     if (file) {
-        $("#terminal__output").append($(`<p>${file.content}</p>`));
+        $("#terminal__output").append($(`<p class="cat-content">${file.content}</p>`));
     } else {
         $("#terminal__output").append($("<p>").text(fileName+" does not exist").addClass("error"));
     }
@@ -271,8 +298,6 @@ function rm(file) {
     }else{
         $("#terminal__output").append($(`<p class='error'>rm: ${file}: no such file or directory<p>`));
     };
-
-    // localStorage.setItem("root", JSON.stringify(storage));
 }
 
 function mv(fileName, location){
@@ -281,59 +306,80 @@ function mv(fileName, location){
     let foldersNames = folders.map(e=> e.name);
     let file = actualFolder.content.find(({name}) => name === fileName);
     let prevFolder = searchPrevFolder(actualFolder);
-    let path = location.split("/");
+    let path;
+    if(location){
+    // if(location && location.includes("/")){
+        path = location.split("/");
+    }
 
-    if(foldersNames.includes(path[0])){
-        if(path.length === 1){
-            $(folders).each((_, e)=>{
-                if(e.name === path[0]){
-                    e.content.push(file);
-                    rm(file.name);
-                }
-            })
-        } else{
-            let returnFolder = actualFolder;
-            $(path).each((i, e)=>{
-                folders = actualFolder.content.filter(e=> e.type === "folder");
-                $(folders).each((i2, folder)=>{
-                    if(folder.name === e && (i+1 < path.length)){
-                    // if(folder.name === e){
-                        actualFolder = folder;
-                    }else{
-                        folder.content.push(file);
-                        actualFolder = returnFolder;
+    if(file !== undefined){
+        if(foldersNames.includes(path[0])){
+            if(path.length === 1){
+                $(folders).each((_, e)=>{
+                    if(e.name === path[0]){
+                        e.content.push(file);
                         rm(file.name);
                     }
                 })
-            })
-        }
-    }else if(path[0] === ".."){
-        if(path.length === 1){
-            prevFolder.content.push(file);
-            rm(file.name);
-        }else{
-            let returnFolder = actualFolder;
-            $(path).each((i, e)=>{
-                if(e === ".."){
-                    actualFolder = prevFolder;
-                    prevFolder = searchPrevFolder(actualFolder);
-                }else{
+            } else{
+                let returnFolder = actualFolder;
+                $(path).each((i, e)=>{
                     folders = actualFolder.content.filter(e=> e.type === "folder");
-                    $(folders).each((i2, folder)=>{
-                        if(folder.name === e && (i+1 < path.length)){
-                            actualFolder = folder;
-                        }else if(i+1 === path.length){
-                            folder.content.push(file);
+                    foldersNames = folders.map(e=> e.name);
+                    if(foldersNames.includes(e)){
+                        $(folders).each((_, folder)=>{
+                            if(folder.name === e && (i+1 < path.length)){
+                                actualFolder = folder;
+                            }else if(folder.name === e && (i+1 === path.length)){
+                                folder.content.push(file);
+                                actualFolder = returnFolder;
+                                rm(file.name);
+                            }
+                        })
+                    }else{
+                        $("#terminal__output").append($(`<p class='error'>mv: ${location}: no such file or directory<p>`));
+                        actualFolder = returnFolder;
+                        return false;
+                    }
+                })
+            }
+        }else if(path[0] === ".."){
+            if(path.length === 1){
+                prevFolder.content.push(file);
+                rm(file.name);
+            }else{
+                let returnFolder = actualFolder;
+                $(path).each((i, e)=>{
+                    if(e === ".."){
+                        actualFolder = prevFolder;
+                        prevFolder = searchPrevFolder(actualFolder);
+                    }else{
+                        folders = actualFolder.content.filter(e=> e.type === "folder");
+                        foldersNames = folders.map(e=> e.name);
+                        if(foldersNames.includes(e)){
+                            $(folders).each((_, folder)=>{
+                                if(folder.name === e && (i+1 < path.length)){
+                                    actualFolder = folder;
+                                }else if(folder.name === e && (i+1 === path.length)){
+                                    folder.content.push(file);
+                                    actualFolder = returnFolder;
+                                    rm(file.name);
+                                }
+                            })
+                        }else{
+                            $("#terminal__output").append($(`<p class='error'>mv: ${location}: no such file or directory<p>`));
                             actualFolder = returnFolder;
-                            console.log("before rm", i)
-                            rm(file.name);
+                            return false;
                         }
-                    })
-                }
-            })
+                    }
+                })
+            }
+        }else{
+            file.name = location;
         }
+    }else{
+        $("#terminal__output").append($(`<p class='error'>mv: ${fileName}: no such file or directory<p>`));
     }
-
 }
 
 function searchPrevFolder(file){

@@ -20,7 +20,7 @@ var root2 = {
                     {
                         "type": "archive",
                         "name": "log1.txt",
-                        "content": "10/Jun/2019 - iPhone login - status: ok",
+                        "content": "10/Jun/2019 - Macintosh 128k login - status: ok",
                         "size": 2000,
                         "date": "1999/10/22",
                         "pwd": "root/src/"
@@ -38,7 +38,7 @@ var root2 = {
                                     {
                                         "type": "folder",
                                         "name": "Pirinees",
-                                        "pwd": "root/src/imgs/Pirinees/",
+                                        "pwd": "root/src/spam/mountain/",
                                         "size": 30000,
                                         "date": "1999/10/24",
                                         "content": []
@@ -46,7 +46,7 @@ var root2 = {
                                     {
                                         "type": "folder",
                                         "name": "Balcans",
-                                        "pwd": "root/src/imgs/Balcans/",
+                                        "pwd": "root/src/spam/mountain/",
                                         "size": 20000,
                                         "content": []
                                     },
@@ -57,7 +57,7 @@ var root2 = {
                     {
                         "type": "archive",
                         "name": "log2.txt",
-                        "content": "10/Jun/2019 - iPhone login - status: ok",
+                        "content": "10/Jun/2019 - Siemens A52 login - status: error",
                         "size": 2000,
                         "date": "1999/10/21",
                         "pwd": "root/src/"

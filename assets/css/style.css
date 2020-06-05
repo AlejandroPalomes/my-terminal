@@ -25,13 +25,18 @@
     width: 70vw;
     background-color: rgb(40, 40, 60);
     box-shadow: 3px 3px 5px rgb(73, 61, 61);
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
     border-radius: 7px;
     position: relative;
 }
 .main__display .display__show{
     /* margin: 2px 4px; */
     padding: 10px;
+}
+
+.display__show{
+    height: calc(100% - 25px);
+    overflow-y: scroll;
 }
 
 .main__display:focus{
@@ -64,7 +69,6 @@
     color: white;
     border: none;
 }
-
 
 
 
@@ -113,7 +117,6 @@
     width: 20%;
     margin-left: 35px;
     display:inline-block;
-    
 }
 
 
@@ -136,4 +139,26 @@
 .synopsis-s{
     color: rgb(2, 230, 2);
     font-weight: 700;
+}
+
+.sugestion-autocomplete {
+    display: block;
+}
+
+.autocomplete {
+    color: rgb(240, 240, 110);
+    margin: 0 20px;
+}
+
+.lsR-result {
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.cat-content {
+    color: aqua;
+}
+
+.folder_title{
+    margin-top: 15px;
 }
