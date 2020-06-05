@@ -95,10 +95,17 @@
 /* style help */
 
 .help {
-  
-   padding-left: 10px;
-   
-   
+    padding-left: 10px;
+}
+
+.man-des, .man-des2{
+    width: 100%;
+    padding-left: 35px;
+}
+
+.man-des2 {
+    display:flex;
+    flex-direction: column;
 }
 
 .help-comnd{
@@ -109,6 +116,24 @@
     
 }
 
+
 .error{
     color: red;
+}
+
+.title-man {
+    color: red;
+    font-weight: 700;
+}
+
+.synopsis-t{
+    color: red;
+    padding-left: 35px;
+    font-weight: 700;
+
+}
+
+.synopsis-s{
+    color: rgb(2, 230, 2);
+    font-weight: 700;
 }
