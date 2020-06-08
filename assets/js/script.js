@@ -1,3 +1,11 @@
+// Recovering folders/archives from localStorage, if there's no key, then create it
+/* if (localStorage.getItem("root") != null) {
+    var root = JSON.parse(localStorage.getItem("root"));
+} else {
+    localStorage.setItem("root", JSON.stringify(root2));
+    var root = root2;
+} */
+
 var actualFolderPath = "root";
 var actualFolder = root2;
 var prevFolder = actualFolder;
@@ -314,7 +322,9 @@ function mv(fileName, location){
 
     if(file !== undefined){
         if(foldersNames.includes(path[0])){
+            //If the dest path is part of the current folder
             if(path.length === 1){
+                //The dest path is in the first level of subfolders
                 $(folders).each((_, e)=>{
                     if(e.name === path[0]){
                         e.content.push(file);
@@ -322,6 +332,7 @@ function mv(fileName, location){
                     }
                 })
             } else{
+                //The dest path is in deeper levels of subfolders
                 let returnFolder = actualFolder;
                 $(path).each((i, e)=>{
                     folders = actualFolder.content.filter(e=> e.type === "folder");
@@ -329,8 +340,10 @@ function mv(fileName, location){
                     if(foldersNames.includes(e)){
                         $(folders).each((_, folder)=>{
                             if(folder.name === e && (i+1 < path.length)){
+                                //if there is still more path to 'reach' then we move 'deeper' the actualFolder
                                 actualFolder = folder;
                             }else if(folder.name === e && (i+1 === path.length)){
+                                //if there is no more path to 'reach' means the file will be 'pushed' inside the folder
                                 folder.content.push(file);
                                 actualFolder = returnFolder;
                                 rm(file.name);
@@ -344,10 +357,13 @@ function mv(fileName, location){
                 })
             }
         }else if(path[0] === ".."){
+            //if the dest path is contained in the upper level path
             if(path.length === 1){
+                //The dest path is in the first level of subfolders
                 prevFolder.content.push(file);
                 rm(file.name);
             }else{
+                //The dest path is in deeper levels of subfolders
                 let returnFolder = actualFolder;
                 $(path).each((i, e)=>{
                     if(e === ".."){
@@ -388,7 +404,9 @@ function executeJs(fileName, op, a, b){
     if (file.type === "js"){
         if(file.pathJS && fileName == "calculator.js"){
             $.get(file.pathJS, (code) => {
+                //with GET we obtain in 'code' all the javascript code contained in 'calculator.js'
                 try{
+                    //Here we add to the 'code' op(a,b), where op can be 'SUM/REST/MULT' and 'a,b' are numbers
                     var result = (eval(`${code}; ${op}(${a}, ${b})`))
                     $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
                 } catch (e){
@@ -398,6 +416,8 @@ function executeJs(fileName, op, a, b){
         }else{
             try {
                 eval(file.content);
+                var result = eval(file.content);
+                $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
             } catch (e) {
                 $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
             }
