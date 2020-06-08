@@ -25,8 +25,7 @@ var root2 = {
                 "pwd": "root/",
                 "size": 28,
                 "date": "1999/10/18",
-                "content": 'function haha(){return 3+3}; haha()',
-                // "content": 'haha()',
+                "content": 'function haha()){return 3+3}; haha()',
             },
             {
                 "type": "folder",

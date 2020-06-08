@@ -162,3 +162,14 @@
 .folder_title{
     margin-top: 15px;
 }
+
+.lyrics__artist{
+    color: lightblue;
+    font-weight: 800;
+    margin: 5px 0 10px 0;
+}
+
+.lyrics__lyrics{
+    color: rgba(200, 200, 214, 0.9);
+    margin: 0 0 10px 10px;
+}

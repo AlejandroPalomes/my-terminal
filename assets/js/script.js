@@ -122,10 +122,15 @@ function userAction() {
                     .append($("<br>"+"<p class='help-comnd'>" + "mv" + "</p>" + "<span class='help'>" + "--Move files and directories" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "clear" + "</p>" + "<span class='help'>" + "--Clear console window" + "</span>"))
                 break;
-                case "JS":
+                case "js":
                     //Execute javascript files
                     executeJs(input[1], input[2], input[3], input[4]);
                 break;
+                case "lyrics":
+                    let input2 = $("#terminal__input").val().split('"'); 
+                    (input[1] === "-p") ? searchSong(input[1], input.splice(2)) : searchSong(input2[1], input2[3]);
+                    //en el caso que tengamos "-p" la llamada seria solo con el parametro, cancion... no? // sí, hay que quitar los dos primeros "lyrics",
+                    break;
                 // Manual command
                 case "man":
                     {
@@ -274,16 +279,20 @@ function mkdir(newFolderName){
     }
 }
 
-function echo(name, fill){
-    fill ? content = fill : content = "";
-    let extension = name.slice(-2);
-    let type = "archive";
+function echo(fileName, fill){
+    // Verifying if file already exists
+    if (actualFolder.content.find( ({name} ) => name === fileName)){
+        $("#terminal__output").append($("<p>").text(fileName+" file already exists").addClass("error"));
+    } else {
+        fill ? content = fill : content = "";
+        let extension = fileName.slice(-2);
+        let type = "archive";
 
-    if (extension === "js"){
-        type = "js"
+        if (extension === "js") type = "js";
+
+        let newFile = {"type":type,"name":fileName,"pwd":actualFolderPath+"/","content":content}
+        actualFolder.content.push(newFile);
     }
-    let newFile = {"type":type,"name":name,"pwd":actualFolderPath+"/","content":content}
-    actualFolder.content.push(newFile);
 }
 
 function cat(fileName) {
@@ -441,4 +450,17 @@ function searchPrevFolder(file){
         }
     }
     return searchPrev;
+}
+
+function searchSong(artist, song){
+    if(artist === "-p"){
+        console.log(artist, song);
+    }else{
+        console.log(artist, song);
+        $.get("https://api.canarado.xyz/lyrics/"+artist+" "+song, (response) => {
+            console.log(response.content[0].lyrics.replace(/\u21B5/g,'<br/>'));
+            $("#terminal__output").append($(`<p class="lyrics__artist"> ${response.content[0].title}<p>`));
+            $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`)); // ok! listo :P la tag pre reconoce los \n // genial!
+        });
+    }
 }
