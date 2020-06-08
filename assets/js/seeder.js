@@ -1,4 +1,4 @@
-var root2 = {
+var rootSeeder = {
         "name": "root",
         "type": "folder",
         "pwd": "/",

@@ -1,14 +1,16 @@
-// Recovering folders/archives from localStorage, if there's no key, then create it
-/* if (localStorage.getItem("root") != null) {
-    var root = JSON.parse(localStorage.getItem("root"));
-} else {
-    localStorage.setItem("root", JSON.stringify(root2));
-    var root = root2;
-} */
-
 var actualFolderPath = "root";
-var actualFolder = root2;
-var prevFolder = actualFolder;
+
+// Recovering folders/archives from localStorage, if there's no key, then create it
+if (localStorage.getItem("root") != null) {
+    var root = JSON.parse(localStorage.getItem("root"));
+    var actualFolder = root;
+    var prevFolder = actualFolder;
+} else {
+    localStorage.setItem("root", JSON.stringify(rootSeeder));
+    var root = JSON.parse(localStorage.getItem("root"));
+    var actualFolder = root;
+    var prevFolder = actualFolder;
+}
 
 // Recovering commands history from localStorage, if there is no stored commands creates new variables
 if (localStorage.getItem("comndHistory") != null) {
@@ -88,7 +90,11 @@ function userAction() {
                 break;
                 case "echo":
                     //Create files and with the possibility of adding text
-                    echo(input[1], input[2]);
+                    let echoName = input[1];
+                    let echoContent = input;
+                    echoContent.splice(0,2);
+                    echoContent = echoContent.join(" ");
+                    echo(echoName, echoContent);
                 break;
                 case "cat":
                     //Show content of a created file
@@ -121,15 +127,20 @@ function userAction() {
                     .append($("<br>"+"<p class='help-comnd'>" + "rm" + "</p>" + "<span class='help'>" + "--Remove a file" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "mv" + "</p>" + "<span class='help'>" + "--Move files and directories" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "clear" + "</p>" + "<span class='help'>" + "--Clear console window" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "js" + "</p>" + "<span class='help'>" + "--Execute a JavaScript file" + "</span>"))
+                    .append($("<br>"+"<p class='help-comnd'>" + "lyrics" + "</p>" + "<span class='help'>" + "--Search a song lyrics" + "</span>"))
                 break;
                 case "js":
                     //Execute javascript files
                     executeJs(input[1], input[2], input[3], input[4]);
                 break;
                 case "lyrics":
-                    let input2 = $("#terminal__input").val().split('"'); 
-                    (input[1] === "-p") ? searchSong(input[1], input.splice(2)) : searchSong(input2[1], input2[3]);
-                    //en el caso que tengamos "-p" la llamada seria solo con el parametro, cancion... no? // sí, hay que quitar los dos primeros "lyrics",
+                    //without the -p parameter we specify artist and song
+                    //Example without -p: lyrics "james blunt" "cold" -> input2=[lyrics , james blunt, , cold]
+                    //with the -p parameter we search by a piece of the lyrics
+                    //Example with -p: lyrics -p "ya no tiene excusa" // should return the song "Tusa"
+                    let input2 = $("#terminal__input").val().split('"');
+                    (input[1] === "-p") ? searchSong(input[1], input2[1]) : searchSong(input2[1], input2[3]);
                     break;
                 // Manual command
                 case "man":
@@ -186,6 +197,17 @@ function userAction() {
                                 $("#terminal__output").append($("<p class='title-man'>" + "NAME" + "</p>" + "<span class='man-des'>" + "clear - Clear the terminal screen" + "</span>"))
                                 .append($("<p class='title-man'>" + "SYNOPSIS" + "</p>"+ "<span class='synopsis-t'>"+" clear" +"</span>" + "<span class='man-des'>" + " [" + "<span class='synopsis-s'>"+"OPTION" + "</span>" + "]..." + "</span>"))
                                 .append($("<p class='title-man'>" + "DESCRIPTION" + "</p>"+ "<span class='man-des'>"+"Clears your screen." + "</span>"))
+                            break;
+                            case "js":
+                                $("#terminal__output").append($("<p class='title-man'>NAME</p><span class='man-des'>js - Execute a JavaScript code</span>"))
+                                .append($("<p class='title-man'>SYNOPSIS</p><span class='synopsis-t'> js</span><span class='man-des'> [<span class='synopsis-s'>FILE</span>]...<span class='synopsis-s'> OPERATOR</span>... </span><span class='synopsis-s'>NUMBER 1</span>...<span class='synopsis-s'> NUMBER 2</span>...</span>"))
+                                .append($("<p class='title-man'>DESCRIPTION</p><span class='man-des'>Run the code inside the selected file.</span>"));
+                            break;
+                            case "lyrics":
+                                $("#terminal__output").append($("<p class='title-man'>NAME</p><span class='man-des'>lyrics - Search a song's lyrics</span>"))
+                                .append($("<p class='title-man'>SYNOPSIS</p><span class='synopsis-t'> lyrics</span><span class='man-des'> [<span class='synopsis-s'>OPTION</span>]...<span class='man-des'> [<span class='synopsis-s'>SONG</span>]...</span>"))
+                                .append($("<p class='title-man'>DESCRIPTION</p><span class='man-des'>Search the lyrics of a song with the artist-title or just some extract of the song.</span>"))
+                                .append($('<p class="title-man">OPTIONS</p><span class="man-des synopsis-t"> [ARTIST NAME]</span><span class="man-des">Artist name, between double quotes "...".</span></br><span class="synopsis-t"> -p</span><span class="man-des margin-left">Search with an extract of the lyrics between double quotes "...".</span>'))
                             break;
                             default:
                                 $("#terminal__output").append($(`<p class="error">Wrong command, please use <b class="error">help</b> for a list of options<p>`))
@@ -276,6 +298,7 @@ function mkdir(newFolderName){
     } else {
         let newFolder = {"type":"folder","name":newFolderName,"pwd":actualFolderPath+"/","content":[]}
         actualFolder.content.push(newFolder);
+        localStorage.setItem("root", JSON.stringify(root));
     }
 }
 
@@ -292,6 +315,7 @@ function echo(fileName, fill){
 
         let newFile = {"type":type,"name":fileName,"pwd":actualFolderPath+"/","content":content}
         actualFolder.content.push(newFile);
+        localStorage.setItem("root", JSON.stringify(root));
     }
 }
 
@@ -317,6 +341,7 @@ function rm(file) {
     }else{
         $("#terminal__output").append($(`<p class='error'>rm: ${file}: no such file or directory<p>`));
     };
+    localStorage.setItem("root", JSON.stringify(root));
 }
 
 function mv(fileName, location){
@@ -405,6 +430,7 @@ function mv(fileName, location){
     }else{
         $("#terminal__output").append($(`<p class='error'>mv: ${fileName}: no such file or directory<p>`));
     }
+    localStorage.setItem("root", JSON.stringify(root));
 }
 
 function executeJs(fileName, op, a, b){
@@ -441,9 +467,9 @@ function searchPrevFolder(file){
     var splitPath = file.pwd.split("/")
     // If the path length has 2 folders means that the previous folder is the ROOT. E.g root/src will give us a size 2 array ;)
     if (splitPath.length <= 2) {
-        searchPrev = root2;
+        searchPrev = root;
     } else {
-        searchPrev = root2;
+        searchPrev = root;
         // Searching for the previous folder beginning by the root
         for (let i = 1; i < splitPath.length-1; i++) {
             searchPrev = searchPrev.content.find( ({ name }) => name === splitPath[i]);
@@ -454,13 +480,16 @@ function searchPrevFolder(file){
 
 function searchSong(artist, song){
     if(artist === "-p"){
-        console.log(artist, song);
+        console.log(song);
+        $.get("https://api.canarado.xyz/lyrics/"+song, (response) => {
+            $("#terminal__output").append($(`<p class="lyrics__artist"> ${response.content[0].title}<p>`));
+            $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`));
+        });
     }else{
         console.log(artist, song);
         $.get("https://api.canarado.xyz/lyrics/"+artist+" "+song, (response) => {
-            console.log(response.content[0].lyrics.replace(/\u21B5/g,'<br/>'));
             $("#terminal__output").append($(`<p class="lyrics__artist"> ${response.content[0].title}<p>`));
-            $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`)); // ok! listo :P la tag pre reconoce los \n // genial!
+            $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`));
         });
     }
 }

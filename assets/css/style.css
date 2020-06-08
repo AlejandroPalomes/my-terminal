@@ -127,6 +127,8 @@
 .title-man {
     color: red;
     font-weight: 700;
+    margin-bottom: 5px;
+    margin-top: 10px;
 }
 
 .synopsis-t{
@@ -139,6 +141,10 @@
 .synopsis-s{
     color: rgb(2, 230, 2);
     font-weight: 700;
+}
+
+.margin-left{
+    margin-left:76px;
 }
 
 .sugestion-autocomplete {
