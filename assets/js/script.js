@@ -1,17 +1,3 @@
-var actualFolderPath = "root";
-
-// Recovering folders/archives from localStorage, if there's no key, then create it
-if (localStorage.getItem("root") != null) {
-    var root = JSON.parse(localStorage.getItem("root"));
-    var actualFolder = root;
-    var prevFolder = actualFolder;
-} else {
-    localStorage.setItem("root", JSON.stringify(rootSeeder));
-    var root = JSON.parse(localStorage.getItem("root"));
-    var actualFolder = root;
-    var prevFolder = actualFolder;
-}
-
 // Recovering commands history from localStorage, if there is no stored commands creates new variables
 if (localStorage.getItem("comndHistory") != null) {
     var comndHistory = JSON.parse(localStorage.getItem("comndHistory"));
@@ -79,6 +65,7 @@ function userAction() {
                 break
                 case "cd":
                     actualFolder = cd(input[1]);
+                    totalSize(actualFolder);
                 break
                 case "pwd":
                     //Print working directory
@@ -113,7 +100,7 @@ function userAction() {
                     $("#terminal__output").empty();
                 break;
                 case "help":
-                    //commands available
+                    //Commands availables
                     $("#terminal__output").append($("<p class='help-comnd'>" + "pwd" + "</p>" + "<span class='help'>" + "--Print working directory" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "ls" + "</p>" + "<span class='help'>" + "--Lists contents of files and directories" + "</span>"))
                     .append($("<br>"+"<p class='help-comnd'>" + "ls -R" + "</p>" + "<span class='help'>" + "--List recursively directory tree" + "</span>"))
@@ -131,14 +118,14 @@ function userAction() {
                     .append($("<br>"+"<p class='help-comnd'>" + "lyrics" + "</p>" + "<span class='help'>" + "--Search a song lyrics" + "</span>"))
                 break;
                 case "js":
-                    //Execute javascript files
+                    // Execute javascript files
                     executeJs(input[1], input[2], input[3], input[4]);
                 break;
                 case "lyrics":
-                    //without the -p parameter we specify artist and song
-                    //Example without -p: lyrics "james blunt" "cold" -> input2=[lyrics , james blunt, , cold]
-                    //with the -p parameter we search by a piece of the lyrics
-                    //Example with -p: lyrics -p "ya no tiene excusa" // should return the song "Tusa"
+                    // Without the -p parameter we specify artist and song
+                    // Example without -p: lyrics "james blunt" "cold" -> input2=[lyrics , james blunt, , cold]
+                    // with the -p parameter we search by a piece of the lyrics
+                    // Example with -p: lyrics -p "ya no tiene excusa" // should return the song "Tusa"
                     let input2 = $("#terminal__input").val().split('"');
                     (input[1] === "-p") ? searchSong(input[1], input2[1]) : searchSong(input2[1], input2[3]);
                     break;
@@ -252,7 +239,7 @@ function ls(folder, parameter){
             return a.size - b.size;
         });
         $(folder.content).each((_, e)=>{
-            $("#terminal__output").append($(`<p><span>${e.name}</span> <span>${e.size}kb</span></p>`));
+            $("#terminal__output").append($(`<p><span>${e.name}</span> -- <span>${e.size}kb</span></p>`));
         })
     }
     else if(parameter === "-R"){
@@ -298,6 +285,7 @@ function mkdir(newFolderName){
     } else {
         let newFolder = {"type":"folder","name":newFolderName,"pwd":actualFolderPath+"/","content":[]}
         actualFolder.content.push(newFolder);
+        totalSize(actualFolder);
         localStorage.setItem("root", JSON.stringify(root));
     }
 }
@@ -313,8 +301,10 @@ function echo(fileName, fill){
 
         if (extension === "js") type = "js";
 
-        let newFile = {"type":type,"name":fileName,"pwd":actualFolderPath+"/","content":content}
+        let size = (Math.random()*((2000-30)+30));
+        let newFile = {"type":type,"name":fileName,"pwd":actualFolderPath+"/","content":content, "size": Math.floor(size)};
         actualFolder.content.push(newFile);
+        totalSize(actualFolder);
         localStorage.setItem("root", JSON.stringify(root));
     }
 }
@@ -341,6 +331,7 @@ function rm(file) {
     }else{
         $("#terminal__output").append($(`<p class='error'>rm: ${file}: no such file or directory<p>`));
     };
+    totalSize(actualFolder);
     localStorage.setItem("root", JSON.stringify(root));
 }
 
@@ -430,35 +421,41 @@ function mv(fileName, location){
     }else{
         $("#terminal__output").append($(`<p class='error'>mv: ${fileName}: no such file or directory<p>`));
     }
+    totalSize(actualFolder);
     localStorage.setItem("root", JSON.stringify(root));
 }
 
 function executeJs(fileName, op, a, b){
     let file = actualFolder.content.find(({name}) => name === fileName);
+    let names = actualFolder.content.map(e=> e.name);
 
-    if (file.type === "js"){
-        if(file.pathJS && fileName == "calculator.js"){
-            $.get(file.pathJS, (code) => {
-                //with GET we obtain in 'code' all the javascript code contained in 'calculator.js'
-                try{
-                    //Here we add to the 'code' op(a,b), where op can be 'SUM/REST/MULT' and 'a,b' are numbers
-                    var result = (eval(`${code}; ${op}(${a}, ${b})`))
+    if(names.includes(fileName)){
+        if (file.type === "js"){
+            if(file.pathJS && fileName == "calculator.js"){
+                $.get(file.pathJS, (code) => {
+                    //with GET we obtain in 'code' all the javascript code contained in 'calculator.js'
+                    try{
+                        //Here we add to the 'code' op(a,b), where op can be 'SUM/REST/MULT' and 'a,b' are numbers
+                        var result = (eval(`${code}; ${op}(${a}, ${b})`))
+                        $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
+                    } catch (e){
+                        $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
+                    }
+                });
+            }else{
+                try {
+                    eval(file.content);
+                    var result = eval(file.content);
                     $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
-                } catch (e){
+                } catch (e) {
                     $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
                 }
-            });
-        }else{
-            try {
-                eval(file.content);
-                var result = eval(file.content);
-                $('#terminal__output').append($('<p>Result: '+ result + '<p>').css("color","aqua"));
-            } catch (e) {
-                $("#terminal__output").append($(`<p class='error'>JS: ${e}</p>`));
             }
+        }else{
+            $("#terminal__output").append($(`<p class='error'>JS: ${fileName}: this file is not a javascript type <p>`));
         }
     }else{
-        $("#terminal__output").append($(`<p class='error'>JS: ${fileName}: this file is not a javascript type <p>`));
+        $("#terminal__output").append($(`<p class='error'>JS: ${fileName}: no such file or directory<p>`));
     }
 }
 
@@ -480,16 +477,14 @@ function searchPrevFolder(file){
 
 function searchSong(artist, song){
     if(artist === "-p"){
-        console.log(song);
         $.get("https://api.canarado.xyz/lyrics/"+song, (response) => {
             $("#terminal__output").append($(`<p class="lyrics__artist"> ${response.content[0].title}<p>`));
             $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`));
-        });
+        }).then(() => document.querySelector(".display__show").scrollTop = document.querySelector(".display__show").scrollHeight);
     }else{
-        console.log(artist, song);
         $.get("https://api.canarado.xyz/lyrics/"+artist+" "+song, (response) => {
             $("#terminal__output").append($(`<p class="lyrics__artist"> ${response.content[0].title}<p>`));
             $("#terminal__output").append($(`<pre class="lyrics__lyrics"> ${response.content[0].lyrics}<pre>`));
-        });
+        }).then(() => document.querySelector(".display__show").scrollTop = document.querySelector(".display__show").scrollHeight);
     }
 }

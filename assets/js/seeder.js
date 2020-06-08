@@ -2,6 +2,7 @@ var rootSeeder = {
         "name": "root",
         "type": "folder",
         "pwd": "/",
+        "size": 0,
         "content": [
             {
                 "type": "archive",
@@ -15,15 +16,15 @@ var rootSeeder = {
                 "type": "js",
                 "name": "calculator.js",
                 "pwd": "root/",
-                "size": 28,
+                "size": 47,
                 "date": "1999/10/28",
                 "pathJS": "assets/js/calculator.js"
             },
             {
                 "type": "js",
-                "name": "myScript.js",
+                "name": "myScriptError.js",
                 "pwd": "root/",
-                "size": 28,
+                "size": 65,
                 "date": "1999/10/18",
                 "content": 'function haha()){return 3+3}; haha()',
             },
@@ -31,7 +32,7 @@ var rootSeeder = {
                 "type": "folder",
                 "name": "src",
                 "pwd": "root/",
-                // "size": totalSize(content),
+                "size": 0,
                 "content": [
                     {
                         "type": "archive",
@@ -45,26 +46,46 @@ var rootSeeder = {
                         "type": "folder",
                         "name": "spam",
                         "pwd": "root/src/",
+                        "size": 0,
                         "content": [
                             {
                                 "type": "folder",
                                 "name": "mountain",
                                 "pwd": "root/src/spam/",
+                                "size": 0,
                                 "content": [
                                     {
                                         "type": "folder",
                                         "name": "Pirinees",
                                         "pwd": "root/src/spam/mountain/",
-                                        "size": 30000,
+                                        "size": 0,
                                         "date": "1999/10/24",
-                                        "content": []
+                                        "content": [
+                                            {
+                                                "type": "archive",
+                                                "name": "mountain.jpg",
+                                                "content": "",
+                                                "size": 20000,
+                                                "date": "1999/10/21",
+                                                "pwd": "root/src/spam/mountain/Pirenees/"
+                                            }
+                                        ]
                                     },
                                     {
                                         "type": "folder",
                                         "name": "Balcans",
                                         "pwd": "root/src/spam/mountain/",
-                                        "size": 20000,
-                                        "content": []
+                                        "size": 0,
+                                        "content": [
+                                            {
+                                                "type": "archive",
+                                                "name": "mountain2.jpg",
+                                                "content": "",
+                                                "size": 30000,
+                                                "date": "1999/10/21",
+                                                "pwd": "root/src/spam/mountain/Balcans/"
+                                            }
+                                        ]
                                     },
                                 ]
                             }
@@ -82,17 +103,19 @@ var rootSeeder = {
                         "type": "folder",
                         "name": "imgs",
                         "pwd": "root/src/",
+                        "size": 0,
                         "content": [
                             {
                                 "type": "folder",
                                 "name": "beach",
                                 "pwd": "root/src/imgs/",
+                                "size": 0,
                                 "content": [
                                     {
                                         "type": "folder",
                                         "name": "barceloneta",
                                         "pwd": "root/src/imgs/beach/",
-                                        "size": 30000,
+                                        "size": 0,
                                         "date": "1999/10/24",
                                         "content": []
                                     },
@@ -100,7 +123,7 @@ var rootSeeder = {
                                         "type": "folder",
                                         "name": "masnou",
                                         "pwd": "root/src/imgs/beach/",
-                                        "size": 20000,
+                                        "size": 0,
                                         "content": []
                                     },
                                 ]
@@ -111,38 +134,32 @@ var rootSeeder = {
             }
         ]
 }
-function totalSize(content){
-    //console.log(content)
+
+var actualFolderPath = "root";
+
+// Recovering folders/archives from localStorage, if there's no key, then create it
+if (localStorage.getItem("root") != null) {
+    var root = JSON.parse(localStorage.getItem("root"));
+    var actualFolder = root;
+    var prevFolder = actualFolder;
+} else {
+    localStorage.setItem("root", JSON.stringify(rootSeeder));
+    var root = JSON.parse(localStorage.getItem("root"));
+    var actualFolder = root;
+    var prevFolder = actualFolder;
 }
-/*
-var root = {
-        "type": "folder",
-        "pwd": "",
-        "content":{
-            "readme.txt": {
-                "type": "archive",
-                "name": "readme.txt",
-                "pwd": "root/",
-                "content": "I am a text on readme.txt"
-            },
-            "src":{
-                "type": "folder",
-                "name": "src",
-                "pwd": "root/",
-                "content": {
-                    "log.text":{
-                        "type": "archive",
-                        "name": "log.txt",
-                        "pwd": "root/src"
-                    },
-                    "imgs":{
-                        "type": "folder",
-                        "name": "imgs",
-                        "pwd": "root/src/",
-                        "content": {}
-                    }
-                }
-            }
-        }
+
+totalSize(actualFolder);
+
+function totalSize(folderLayer){
+    let folders = folderLayer.content.filter(e => e.type === "folder");
+    if(folders.length){
+        folders.forEach((folder)=>{
+            totalSize(folder);
+        })
     }
-    */
+
+    let sizes = folderLayer.content.map(e => e.size);
+    folderLayer.size = sizes.reduce((a, b) => a + b, 0);
+    //console.log("currentFolder size: " + folderLayer.size + " contents size: " + sizes )
+}
